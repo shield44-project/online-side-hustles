@@ -32,6 +32,7 @@ const riskFilters: Array<"All" | RiskLevel> = [
 ];
 
 const navLinks = [
+  { label: "Surveys", href: "#surveys" },
   { label: "Dashboard", href: "#dashboard" },
   { label: "Methods", href: "#methods" },
   { label: "Categories", href: "#categories" },
@@ -56,7 +57,16 @@ const allLane: DashboardLane = {
   ],
 };
 
-const laneViews = [allLane, ...dashboardLanes];
+const surveyLane =
+  dashboardLanes.find((lane) => lane.id === "surveys") ?? dashboardLanes[0];
+
+const laneViews = [
+  allLane,
+  ...(surveyLane ? [surveyLane] : []),
+  ...dashboardLanes.filter((lane) => lane.id !== "surveys"),
+];
+
+const surveyMethod = methods.find((method) => method.id === "surveys") ?? methods[0];
 
 function includesQuery(method: Method, query: string) {
   const haystack = [
@@ -93,8 +103,8 @@ function getInitialTheme() {
 export default function App() {
   const [query, setQuery] = useState("");
   const [activeRisk, setActiveRisk] = useState<"All" | RiskLevel>("All");
-  const [activeLane, setActiveLane] = useState("all");
-  const [activeMethodId, setActiveMethodId] = useState(methods[0]?.id ?? "");
+  const [activeLane, setActiveLane] = useState("surveys");
+  const [activeMethodId, setActiveMethodId] = useState(surveyMethod?.id ?? methods[0]?.id ?? "");
   const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme);
   const deferredQuery = useDeferredValue(query);
 
@@ -173,14 +183,68 @@ export default function App() {
         </button>
       </div>
 
+      <section className="panel survey-spotlight reveal reveal-delay-2" id="surveys">
+        <div className="survey-spotlight-copy">
+          <p className="eyebrow">Survey first</p>
+          <h2>Open the fastest pocket-cash lane before you browse the rest.</h2>
+          <p className="survey-spotlight-text">
+            Survey and rewards apps are the least demanding entry point on the board.
+            They stay inconsistent, but they give you a clean starting lane with clear links.
+          </p>
+
+          <div className="survey-spotlight-stats">
+            <article>
+              <span>Primary method</span>
+              <strong>{surveyMethod?.name ?? "Survey and rewards apps"}</strong>
+            </article>
+            <article>
+              <span>Risk profile</span>
+              <strong>{surveyMethod?.risk ?? "Low-Medium"}</strong>
+            </article>
+            <article>
+              <span>Payout pace</span>
+              <strong>{surveyMethod?.timeToPayout ?? "Fast when available"}</strong>
+            </article>
+          </div>
+
+          <div className="survey-spotlight-actions">
+            <a className="primary-action" href="#methods">
+              Inspect survey method
+            </a>
+            <a className="secondary-action" href="#spreadsheet">
+              Open the survey sheet
+            </a>
+          </div>
+        </div>
+
+        <div className="survey-spotlight-grid">
+          {surveyLane?.links.slice(0, 4).map((link, index) => (
+            <a
+              className={
+                index === 0
+                  ? "survey-spotlight-card survey-spotlight-featured survey-spotlight-tone-1"
+                  : `survey-spotlight-card survey-spotlight-tone-${(index % 3) + 1}`
+              }
+              href={link.href}
+              key={link.href}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <span>{index === 0 ? "Recommended starting link" : "Survey link"}</span>
+              <strong>{link.label}</strong>
+              <p>{surveyMethod?.blurb}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <header className="hero">
         <div className="hero-copy panel reveal reveal-delay-1">
           <p className="eyebrow">TypeScript money board</p>
-          <h1>Cooler UI, darker mode, and actual jump-off links for each lane.</h1>
+          <h1>Track online income lanes by payout speed, risk, and real platform links.</h1>
           <p className="hero-text">
-            This version works like a dashboard instead of a long note. You can
-            switch lanes like surveys, passive apps, games, trading, and build
-            paths, then drill into the methods and links that actually matter.
+            Start with surveys, then branch into passive apps, content, build
+            paths, and the high-risk stuff that should stay flagged.
           </p>
 
           <div className="hero-actions">
@@ -243,7 +307,7 @@ export default function App() {
           <div className="section-heading section-heading-row">
             <div>
               <p className="eyebrow">Lane dashboard</p>
-              <h2>Switch between surveys, games, trading, build paths, and the danger zone.</h2>
+              <h2>Start with surveys, then switch into the rest of the board.</h2>
             </div>
 
             <p className="section-note">
